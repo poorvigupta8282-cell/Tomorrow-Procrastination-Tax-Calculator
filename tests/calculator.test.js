@@ -1,1 +1,58 @@
-const test=require("node:test"),assert=require("node:assert/strict");const H={hours:1,days:24,weeks:168},M={minutes:1,hours:60,days:480};function calc({postponements,delay,delayUnit,remaining,remainingUnit}){let n=Number(postponements),d=Number(delay),w=Number(remaining);if(![n,d,w].every(Number.isFinite)||n<0||d<=0||w<=0||!H[delayUnit]||!M[remainingUnit])throw RangeError("Invalid input");return{lostHours:n*d*H[delayUnit],remainingMinutes:w*M[remainingUnit]}}test("calculates elapsed delay",()=>assert.deepEqual(calc({postponements:7,delay:1,delayUnit:"days",remaining:3,remainingUnit:"hours"}),{lostHours:168,remainingMinutes:180}));test("allows zero postponements",()=>assert.equal(calc({postponements:0,delay:2,delayUnit:"hours",remaining:30,remainingUnit:"minutes"}).lostHours,0));test("rejects invalid values and units",()=>{assert.throws(()=>calc({postponements:-1,delay:1,delayUnit:"days",remaining:1,remainingUnit:"hours"}));assert.throws(()=>calc({postponements:1,delay:1,delayUnit:"fortnight",remaining:1,remainingUnit:"hours"}))});
+"use strict";
+
+const test = require("node:test");
+const assert = require("node:assert/strict");
+const { calculateTax, formatDuration, formatWork } = require("../js/calculator-node.cjs");
+
+test("calculates elapsed delay and remaining work", () => {
+  assert.deepEqual(
+    calculateTax({
+      postponements: 7,
+      delay: 1,
+      delayUnit: "days",
+      remaining: 3,
+      remainingUnit: "hours",
+    }),
+    { lostHours: 168, remainingMinutes: 180 }
+  );
+});
+
+test("allows zero postponements", () => {
+  assert.equal(
+    calculateTax({
+      postponements: 0,
+      delay: 2,
+      delayUnit: "hours",
+      remaining: 30,
+      remainingUnit: "minutes",
+    }).lostHours,
+    0
+  );
+});
+
+test("rejects invalid values and time units", () => {
+  assert.throws(() =>
+    calculateTax({
+      postponements: -1,
+      delay: 1,
+      delayUnit: "days",
+      remaining: 1,
+      remainingUnit: "hours",
+    })
+  );
+  assert.throws(() =>
+    calculateTax({
+      postponements: 1,
+      delay: 1,
+      delayUnit: "fortnight",
+      remaining: 1,
+      remainingUnit: "hours",
+    })
+  );
+});
+
+test("formats elapsed time and remaining work", () => {
+  assert.equal(formatDuration(0.5), "30 min");
+  assert.equal(formatDuration(48), "2 days");
+  assert.equal(formatWork(90), "1.5 hours");
+});
